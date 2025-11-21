@@ -2,35 +2,39 @@
  * Main Stylesheet
  *
  * Imports all style modules in the correct order.
+ * This is the single entry point for all CSS.
  */
+
+/* ==========================================================================
+   1. FOUNDATION LAYER - Design tokens and variables
+   ========================================================================== */
 
 @import './tokens.css';
 
-/* Phase 2 will add:
+/* ==========================================================================
+   2. BASE LAYER - Reset and typography
+   ========================================================================== */
+
 @import './reset.css';
 @import './typography.css';
+
+/* ==========================================================================
+   3. ANIMATION LAYER - Keyframes and utilities
+   ========================================================================== */
+
 @import './animations.css';
-*/
 
-/* Temporary global styles - will be extracted in Phase 2 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-}
+/* ==========================================================================
+   4. COMPONENT LAYER - UI components
+   ========================================================================== */
 
-body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
+@import '../components/canvas/canvas.css';
+@import '../components/nodes/nodes.css';
+@import '../components/ui/ui.css';
+
+/* ==========================================================================
+   5. APPLICATION LAYER - App-specific styles
+   ========================================================================== */
 
 #app {
   width: 100%;

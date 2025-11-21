@@ -1,0 +1,228 @@
+/**
+ * Node Component Styles
+ *
+ * Styles for image generation nodes on the canvas.
+ * Extracted from original index.html node styles.
+ */
+
+/* ==========================================================================
+   BASE NODE
+   ========================================================================== */
+
+.node {
+  position: absolute;
+  width: var(--node-width);
+
+  /* Auto height based on content */
+  background: var(--color-bg-node);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--node-border-radius);
+  box-shadow: var(--shadow-md);
+
+  /* Enable clicks */
+  pointer-events: auto;
+
+  /* Transitions */
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal);
+
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+
+  /* Allow badges to pop out */
+  overflow: visible;
+}
+
+/* ==========================================================================
+   NODE STATES
+   ========================================================================== */
+
+/* Hover state */
+.node:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-node-hover);
+}
+
+/* Selected state */
+.node.selected {
+  border: 2px solid var(--color-accent-primary);
+  box-shadow: 0 0 0 4px var(--color-accent-primary-glow);
+}
+
+/* Dragging state */
+.node.is-dragging {
+  cursor: grabbing;
+  transform: scale(1.02);
+  z-index: var(--z-node-dragging);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* ==========================================================================
+   NODE IMAGE CONTAINER
+   ========================================================================== */
+
+.node-image-container {
+  width: 100%;
+  height: var(--node-image-height);
+  border-radius: var(--node-border-radius) var(--node-border-radius) 0 0;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+.node-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--transition-slow);
+  opacity: 0.9;
+}
+
+.node:hover .node-image-container img {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   METADATA BADGE
+   ========================================================================== */
+
+.meta-badge {
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  background: var(--color-overlay-dark);
+  backdrop-filter: blur(var(--blur-sm));
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  border: 1px solid var(--color-border-node);
+  z-index: var(--z-node-badge);
+}
+
+/* ==========================================================================
+   NODE FOOTER (PROMPT)
+   ========================================================================== */
+
+.node-footer {
+  padding: var(--space-xl);
+  background: var(--color-bg-node-footer);
+  border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.node-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-main);
+  margin-bottom: var(--space-xs);
+}
+
+.node-prompt {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-tight);
+
+  /* Clamp to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   GHOST NODE (LOADING STATE)
+   ========================================================================== */
+
+.node.ghost {
+  border: 1px dashed var(--color-text-muted);
+  background: transparent;
+  box-shadow: none;
+}
+
+.node.ghost .node-image-container {
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Pulse ring loading indicator */
+.pulse-ring {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-accent-primary);
+  border-radius: var(--radius-full);
+  animation: pulse 2s infinite;
+}
+
+/* ==========================================================================
+   PORTS
+   ========================================================================== */
+
+/* Port wrapper - positioned at top (input) or bottom (output) */
+.port-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--port-wrapper-size);
+  height: var(--port-wrapper-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-ports);
+}
+
+.port-wrapper.input {
+  top: calc(-1 * var(--port-offset));
+}
+
+.port-wrapper.output {
+  bottom: calc(-1 * var(--port-offset));
+}
+
+/* Port element */
+.port {
+  width: var(--port-size);
+  height: var(--port-size);
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  border: 2px solid var(--color-bg-primary);
+  cursor: crosshair;
+
+  /* Hidden until hover */
+  opacity: 0;
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+/* Port hover state - must come before .node:hover .port */
+.port:hover {
+  transform: scale(1.5);
+  background: var(--color-accent-secondary);
+}
+
+/* Show ports on node hover */
+.node:hover .port {
+  opacity: 1;
+}
+
+/* Port active/connecting state */
+.port.connecting {
+  opacity: 1;
+  background: var(--color-accent-primary);
+  transform: scale(1.25);
+}
+
+/* Valid drop target */
+.port.valid-target {
+  opacity: 1;
+  background: var(--color-accent-secondary);
+  animation: pulse 1s infinite;
+}

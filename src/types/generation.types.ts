@@ -398,7 +398,6 @@ export interface GeminiImageGenerationConfig {
  */
 export interface GeminiGenerationConfig {
   responseModalities: string[];
-  imageGenerationConfig?: GeminiImageGenerationConfig;
 }
 
 /**
@@ -415,6 +414,7 @@ export interface GeminiRequestBody {
     parts: { text: string }[];
   };
   tools?: { googleSearch: Record<string, never> }[];
+  imageGenerationConfig?: GeminiImageGenerationConfig;
 }
 
 // =============================================================================

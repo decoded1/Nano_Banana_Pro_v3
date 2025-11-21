@@ -402,9 +402,9 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     imageGenerationConfig.addWatermark = config.addWatermark;
   }
 
-  // Add imageGenerationConfig if we have any settings
+  // Add imageGenerationConfig at top level if we have any settings
   if (Object.keys(imageGenerationConfig).length > 0) {
-    requestBody.generationConfig.imageGenerationConfig = imageGenerationConfig;
+    requestBody.imageGenerationConfig = imageGenerationConfig;
   }
 
   // Add Google Search grounding if enabled

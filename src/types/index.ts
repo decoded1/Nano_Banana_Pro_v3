@@ -5,12 +5,20 @@
  * Import types using: import type { NodeConfig } from '@/types';
  */
 
-// Generation types (needed for geminiService)
+// Node types - entities on the canvas
+export * from './node.types';
+
+// Canvas types - viewport, transforms, spatial
+export * from './canvas.types';
+
+// Connection types - wires, ports, genealogy
+export * from './connection.types';
+
+// Generation types - Gemini API, image generation
 export * from './generation.types';
 
-// Phase 1 will populate these exports:
-// export * from './node.types';
-// export * from './canvas.types';
-// export * from './connection.types';
-// export * from './ui.types';
-// export * from './events.types';
+// UI types - panels, modals, prompts
+export * from './ui.types';
+
+// Event types - event bus, payloads
+export * from './events.types';

@@ -15,6 +15,8 @@ import type {
   GeminiRequestContent,
   GeminiImageGenerationConfig,
   GeminiRequestBody,
+  AspectRatio,
+  PersonGeneration,
 } from '../types';
 
 // =============================================================================
@@ -368,7 +370,7 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
 
   // Aspect ratio - supported: "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
   if (config.aspectRatio && ASPECT_RATIO_MAP[config.aspectRatio]) {
-    imageGenerationConfig.aspectRatio = ASPECT_RATIO_MAP[config.aspectRatio];
+    imageGenerationConfig.aspectRatio = ASPECT_RATIO_MAP[config.aspectRatio] as AspectRatio;
   }
 
   // Image size - supported: "1K", "2K", "4K"
@@ -384,7 +386,7 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
   // Person generation - values: "DONT_ALLOW", "ALLOW_ADULT", "ALLOW_ALL"
   if (config.personGeneration) {
     // Convert to API format (uppercase with underscore)
-    const personGenMap: Record<string, string> = {
+    const personGenMap: Record<string, PersonGeneration> = {
       dont_allow: 'DONT_ALLOW',
       allow_adult: 'ALLOW_ADULT',
       allow_all: 'ALLOW_ALL',
@@ -392,7 +394,7 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
       ALLOW_ADULT: 'ALLOW_ADULT',
       ALLOW_ALL: 'ALLOW_ALL',
     };
-    imageGenerationConfig.personGeneration = personGenMap[config.personGeneration] || 'ALLOW_ADULT';
+    imageGenerationConfig.personGeneration = personGenMap[config.personGeneration] ?? 'ALLOW_ADULT';
   }
 
   // SynthID Watermark - boolean

@@ -52,5 +52,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "immer": "^10.2.0",
+    "zustand": "^5.0.8"
   }
 }

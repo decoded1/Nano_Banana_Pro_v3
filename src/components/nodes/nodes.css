@@ -2,7 +2,7 @@
  * Node Component Styles
  *
  * Styles for image generation nodes on the canvas.
- * Extracted from original index.html node styles.
+ * Uses design tokens for consistency.
  */
 
 /* ==========================================================================
@@ -70,7 +70,7 @@
   height: var(--node-image-height);
   border-radius: var(--node-border-radius) var(--node-border-radius) 0 0;
   overflow: hidden;
-  background: #000;
+  background: var(--color-bg-black);
   position: relative;
 }
 
@@ -92,13 +92,13 @@
 
 .meta-badge {
   position: absolute;
-  top: var(--space-lg);
-  right: var(--space-lg);
+  top: var(--space-3);
+  right: var(--space-3);
   background: var(--color-overlay-dark);
   backdrop-filter: blur(var(--blur-sm));
-  padding: var(--space-2xs) var(--space-sm);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-xs);
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   border: 1px solid var(--color-border-node);
   z-index: var(--z-node-badge);
@@ -109,23 +109,23 @@
    ========================================================================== */
 
 .node-footer {
-  padding: var(--space-xl);
+  padding: var(--space-3);
   background: var(--color-bg-node-footer);
   border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
   border-top: 1px solid var(--color-border-subtle);
 }
 
 .node-title {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-main);
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-1);
 }
 
 .node-prompt {
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-snug);
 
   /* Clamp to 2 lines */
   display: -webkit-box;
@@ -154,11 +154,11 @@
 
 /* Pulse ring loading indicator */
 .pulse-ring {
-  width: 40px;
-  height: 40px;
+  width: var(--pulse-ring-size);
+  height: var(--pulse-ring-size);
   border: 2px solid var(--color-accent-primary);
   border-radius: var(--radius-full);
-  animation: pulse 2s infinite;
+  animation: pulse var(--duration-pulse) var(--ease-out) infinite;
 }
 
 /* ==========================================================================
@@ -199,13 +199,21 @@
   opacity: 0;
   transition:
     opacity var(--transition-normal),
-    transform var(--transition-normal);
+    transform var(--transition-normal),
+    background var(--transition-normal);
 }
 
 /* Port hover state - must come before .node:hover .port */
 .port:hover {
   transform: scale(1.5);
   background: var(--color-accent-secondary);
+}
+
+/* Port focus state for keyboard navigation */
+.port:focus-visible {
+  opacity: 1;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 /* Show ports on node hover */
@@ -224,5 +232,5 @@
 .port.valid-target {
   opacity: 1;
   background: var(--color-accent-secondary);
-  animation: pulse 1s infinite;
+  animation: pulse var(--duration-slowest) var(--ease-out) infinite;
 }

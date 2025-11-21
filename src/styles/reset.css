@@ -2,7 +2,7 @@
  * CSS Reset
  *
  * Minimal reset for consistent cross-browser rendering.
- * Extracted from original index.html global styles.
+ * Includes global focus-visible styles for accessibility.
  */
 
 /* Box sizing reset */
@@ -33,6 +33,25 @@ body {
   color: var(--color-text-main);
 }
 
+/* ==========================================================================
+   FOCUS STYLES (WCAG 2.1 Compliance)
+   ========================================================================== */
+
+/* Global focus-visible style for keyboard navigation */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Remove default focus for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==========================================================================
+   ELEMENT RESETS
+   ========================================================================== */
+
 /* Remove default list styles */
 ul,
 ol {
@@ -45,6 +64,7 @@ button {
   cursor: pointer;
   background: none;
   border: none;
+  color: inherit;
 }
 
 /* Remove default input styles */
@@ -54,6 +74,7 @@ textarea {
   background: none;
   border: none;
   outline: none;
+  color: inherit;
 }
 
 /* Remove default anchor styles */
@@ -67,4 +88,11 @@ img,
 svg {
   display: block;
   max-width: 100%;
+}
+
+/* Remove default fieldset styles */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
 }

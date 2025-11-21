@@ -2,7 +2,7 @@
  * Canvas Component Styles
  *
  * Styles for the infinite canvas workspace, view transforms, and connection wires.
- * Extracted from original index.html workspace/engine styles.
+ * Uses design tokens for consistency.
  */
 
 /* ==========================================================================
@@ -97,6 +97,6 @@
 
 /* Invalid connection wire */
 .wire.invalid {
-  stroke: #f44;
+  stroke: var(--color-wire-invalid);
   stroke-dasharray: 4 4;
 }

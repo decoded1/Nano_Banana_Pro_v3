@@ -12,6 +12,8 @@
 
   /* Background Colors */
   --color-bg-primary: #0f1115;
+  --color-bg-main: #0f1115;
+  --color-bg-surface: #1a1d24;
   --color-bg-black: #000;
   --color-bg-node: #1a1d24;
   --color-bg-node-footer: rgb(255 255 255 / 2%);
@@ -28,9 +30,12 @@
 
   /* Accent Colors */
   --color-accent-primary: #7c4dff;
+  --color-accent-primary-hover: #9d7aff;
   --color-accent-secondary: #448aff;
   --color-accent-primary-glow: rgb(124 77 255 / 15%);
   --color-accent-primary-bg: rgb(124 77 255 / 20%);
+  --color-accent-primary-10: rgb(124 77 255 / 10%);
+  --color-accent-primary-20: rgb(124 77 255 / 20%);
   --color-accent-primary-40: rgb(124 77 255 / 40%);
   --color-accent-secondary-10: rgb(68 138 255 / 10%);
 
@@ -116,6 +121,8 @@
      ========================================================================== */
 
   --font-family-base: 'Inter', -apple-system, blinkmacsystemfont, sans-serif;
+  --font-family-mono:
+    'JetBrains Mono', 'Fira Code', 'SF Mono', menlo, monaco, 'Courier New', monospace;
 
   /* Font Sizes */
   --font-size-xs: 11px;
@@ -206,6 +213,7 @@
   --z-ui-layer: 100;
   --z-toast: 110;
   --z-context-menu: 120;
+  --z-modal: 200;
 
   /* ==========================================================================
      GRID

@@ -7,3 +7,4 @@ export { LeftDrawer } from './LeftDrawer';
 export { PromptIsland } from './PromptIsland';
 export { ToastContainer } from './ToastContainer';
 export { ContextMenu } from './ContextMenu';
+export { ModalManager } from './ModalManager';

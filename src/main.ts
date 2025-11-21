@@ -14,6 +14,7 @@ import {
   PromptIsland,
   ToastContainer,
   ContextMenu,
+  ModalManager,
   Minimap,
   BoxSelection,
 } from './components';
@@ -38,6 +39,7 @@ let leftDrawer: LeftDrawer | null = null;
 let promptIsland: PromptIsland | null = null;
 let toastContainer: ToastContainer | null = null;
 let contextMenu: ContextMenu | null = null;
+let modalManager: ModalManager | null = null;
 let minimap: Minimap | null = null;
 let boxSelection: BoxSelection | null = null;
 
@@ -76,6 +78,7 @@ const initApp = async (): Promise<void> => {
   promptIsland = new PromptIsland();
   toastContainer = new ToastContainer();
   contextMenu = new ContextMenu();
+  modalManager = new ModalManager();
   minimap = new Minimap();
   boxSelection = new BoxSelection();
 
@@ -93,6 +96,7 @@ const initApp = async (): Promise<void> => {
   promptIsland.mount(uiLayer);
   toastContainer.mount(uiLayer);
   contextMenu.mount(uiLayer);
+  modalManager.mount(uiLayer);
 
   // Add UI layer to app
   appElement.appendChild(uiLayer);
@@ -129,6 +133,7 @@ const cleanupApp = (): void => {
   promptIsland?.destroy();
   toastContainer?.destroy();
   contextMenu?.destroy();
+  modalManager?.destroy();
   minimap?.destroy();
   boxSelection?.destroy();
 
@@ -142,6 +147,7 @@ const cleanupApp = (): void => {
   promptIsland = null;
   toastContainer = null;
   contextMenu = null;
+  modalManager = null;
   minimap = null;
   boxSelection = null;
 };
@@ -173,6 +179,7 @@ export {
   promptIsland,
   toastContainer,
   contextMenu,
+  modalManager,
   minimap,
   boxSelection,
 };

@@ -79,5 +79,5 @@ export interface GenerationResult {
   /** Generated image data URLs */
   images: string[];
   /** Model response for conversation history */
-  modelResponse?: ConversationTurn;
+  modelResponse?: ConversationTurn | undefined;
 }

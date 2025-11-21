@@ -5,6 +5,8 @@
  * It initializes the app and mounts all components to the DOM.
  */
 
+import './styles/main.css';
+
 import {
   Canvas,
   TopBar,

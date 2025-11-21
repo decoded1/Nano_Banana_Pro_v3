@@ -88,14 +88,22 @@ export class LeftDrawer extends Component {
    * Handle item click
    */
   private handleItemClick(type: DrawerItemType): void {
-    const { drawer, openDrawer, closeDrawer } = useStore.getState();
+    const store = useStore.getState();
 
-    if (drawer.isOpen && drawer.activeItem === type) {
+    // Settings opens modal instead of drawer
+    if (type === 'settings') {
+      store.openModal('settings');
+      eventBus.emit(EVENTS.UI.DRAWER_ITEM_CLICKED, { itemType: type });
+      return;
+    }
+
+    // Other items use drawer behavior
+    if (store.drawer.isOpen && store.drawer.activeItem === type) {
       // Close if clicking same item
-      closeDrawer();
+      store.closeDrawer();
     } else {
       // Open or switch to this item
-      openDrawer(type);
+      store.openDrawer(type);
     }
 
     // Emit event

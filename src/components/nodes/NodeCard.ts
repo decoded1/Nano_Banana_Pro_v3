@@ -169,10 +169,21 @@ export class NodeCard extends Component {
     this._isDragging = true;
     this._dragStart = { x: e.clientX, y: e.clientY };
 
+    const store = useStore.getState();
     const state = this.getNodeState();
+
     if (state) {
       this._initialPosition = { ...state.position };
     }
+
+    // If this node isn't selected, select it (replacing existing selection unless modifier key)
+    const isAdditive = e.shiftKey || e.ctrlKey || e.metaKey;
+    if (!store.selectedIds.includes(this._nodeId)) {
+      store.selectNode(this._nodeId, isAdditive);
+    }
+
+    // Bring to front
+    store.bringToFront(this._nodeId);
 
     // Add dragging class
     this._element?.classList.add('is-dragging');
@@ -190,23 +201,41 @@ export class NodeCard extends Component {
   private handleMouseMove(e: MouseEvent): void {
     if (!this._isDragging) return;
 
-    const scale = useStore.getState().transform.scale;
+    const store = useStore.getState();
+    const scale = store.transform.scale;
     const dx = (e.clientX - this._dragStart.x) / scale;
     const dy = (e.clientY - this._dragStart.y) / scale;
 
-    const newPosition = {
-      x: this._initialPosition.x + dx,
-      y: this._initialPosition.y + dy,
-    };
+    const delta = { x: dx, y: dy };
 
-    // Update position in store
-    useStore.getState().setNodePosition(this._nodeId, newPosition);
+    // Move all selected nodes if this node is part of selection
+    if (store.selectedIds.includes(this._nodeId) && store.selectedIds.length > 1) {
+      // Use moveNodes for multi-node drag
+      // Calculate delta from last frame instead of from start
+      const currentState = this.getNodeState();
+      if (currentState) {
+        const frameDelta = {
+          x: this._initialPosition.x + dx - currentState.position.x,
+          y: this._initialPosition.y + dy - currentState.position.y,
+        };
+        if (frameDelta.x !== 0 || frameDelta.y !== 0) {
+          store.moveNodes(store.selectedIds, frameDelta);
+        }
+      }
+    } else {
+      // Single node drag
+      const newPosition = {
+        x: this._initialPosition.x + dx,
+        y: this._initialPosition.y + dy,
+      };
+      store.setNodePosition(this._nodeId, newPosition);
+    }
 
     // Emit drag move
     eventBus.emit(EVENTS.NODE.DRAG_MOVE, {
       nodeId: this._nodeId,
-      currentPosition: newPosition,
-      delta: { x: dx, y: dy },
+      currentPosition: this.getNodeState()?.position ?? { x: 0, y: 0 },
+      delta,
     });
   }
 
@@ -263,47 +292,11 @@ export class NodeCard extends Component {
     e.preventDefault();
     e.stopPropagation();
 
-    useStore.getState().showContextMenu(
-      { x: e.clientX, y: e.clientY },
-      [
-        { id: 'edit', label: 'Edit', action: () => this.handleEdit() },
-        { id: 'duplicate', label: 'Duplicate', action: () => this.handleDuplicate() },
-        { id: 'separator', label: '', separator: true },
-        { id: 'delete', label: 'Delete', action: () => this.handleDelete(), danger: true },
-      ],
-      { id: this._nodeId, type: 'node' },
-    );
-  }
-
-  /**
-   * Handle edit action
-   */
-  private handleEdit(): void {
-    useStore.getState().openModal('node-details', { nodeId: this._nodeId });
-  }
-
-  /**
-   * Handle duplicate action
-   */
-  private handleDuplicate(): void {
-    const state = this.getNodeState();
-    if (!state) return;
-
-    useStore.getState().addNode({
-      ...state.config,
-      id: generateId('node'),
-      position: {
-        x: state.position.x + 50,
-        y: state.position.y + 50,
-      },
+    // Emit context menu show event with node context
+    eventBus.emit(EVENTS.UI.CONTEXT_MENU_SHOW, {
+      position: { x: e.clientX, y: e.clientY },
+      nodeId: this._nodeId,
     });
-  }
-
-  /**
-   * Handle delete action
-   */
-  private handleDelete(): void {
-    useStore.getState().removeNode(this._nodeId);
   }
 
   /**

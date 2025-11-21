@@ -7,9 +7,23 @@
 
 import './styles/main.css';
 
-import { Canvas, TopBar, LeftDrawer, PromptIsland, ToastContainer } from './components';
+import {
+  Canvas,
+  TopBar,
+  LeftDrawer,
+  PromptIsland,
+  ToastContainer,
+  ContextMenu,
+  Minimap,
+  BoxSelection,
+} from './components';
 import { initKeyboardShortcuts, cleanupKeyboardShortcuts } from './core/events';
-import { initGenerationService, stopGenerationService } from './services';
+import {
+  initGenerationService,
+  stopGenerationService,
+  initClipboardService,
+  cleanupClipboardService,
+} from './services';
 import {
   initializeEventBridge,
   cleanupEventBridge,
@@ -23,6 +37,9 @@ let topBar: TopBar | null = null;
 let leftDrawer: LeftDrawer | null = null;
 let promptIsland: PromptIsland | null = null;
 let toastContainer: ToastContainer | null = null;
+let contextMenu: ContextMenu | null = null;
+let minimap: Minimap | null = null;
+let boxSelection: BoxSelection | null = null;
 
 /**
  * Application initialization
@@ -58,26 +75,36 @@ const initApp = async (): Promise<void> => {
   leftDrawer = new LeftDrawer();
   promptIsland = new PromptIsland();
   toastContainer = new ToastContainer();
+  contextMenu = new ContextMenu();
+  minimap = new Minimap();
+  boxSelection = new BoxSelection();
 
   // Mount canvas directly to app
   canvas.mount(appElement);
+
+  // Mount canvas overlay components (inside canvas for proper positioning)
+  const canvasElement = canvas.element;
+  minimap.mount(canvasElement);
+  boxSelection.mount(canvasElement);
 
   // Mount UI components to UI layer
   topBar.mount(uiLayer);
   leftDrawer.mount(uiLayer);
   promptIsland.mount(uiLayer);
   toastContainer.mount(uiLayer);
+  contextMenu.mount(uiLayer);
 
   // Add UI layer to app
   appElement.appendChild(uiLayer);
 
-  // Initialize generation service (queue processor)
+  // Initialize services
   initGenerationService();
+  initClipboardService();
 
   // Log initialization
   if (import.meta.env.DEV) {
     console.log('[Nano Banana Pro] Application initialized');
-    console.log('[Nano Banana Pro] Phase 8: Persistence integrated');
+    console.log('[Nano Banana Pro] Phase 9: Advanced features integrated');
   }
 };
 
@@ -85,8 +112,9 @@ const initApp = async (): Promise<void> => {
  * Application cleanup
  */
 const cleanupApp = (): void => {
-  // Stop generation service
+  // Stop services
   stopGenerationService();
+  cleanupClipboardService();
 
   // Cleanup persistence
   cleanupProjectManager();
@@ -100,6 +128,9 @@ const cleanupApp = (): void => {
   leftDrawer?.destroy();
   promptIsland?.destroy();
   toastContainer?.destroy();
+  contextMenu?.destroy();
+  minimap?.destroy();
+  boxSelection?.destroy();
 
   // Cleanup event bridge
   cleanupEventBridge();
@@ -110,6 +141,9 @@ const cleanupApp = (): void => {
   leftDrawer = null;
   promptIsland = null;
   toastContainer = null;
+  contextMenu = null;
+  minimap = null;
+  boxSelection = null;
 };
 
 // Initialize when DOM is ready
@@ -132,4 +166,13 @@ if (import.meta.hot) {
 }
 
 // Export for external access (useful for debugging)
-export { canvas, topBar, leftDrawer, promptIsland, toastContainer };
+export {
+  canvas,
+  topBar,
+  leftDrawer,
+  promptIsland,
+  toastContainer,
+  contextMenu,
+  minimap,
+  boxSelection,
+};

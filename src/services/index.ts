@@ -56,3 +56,11 @@ export {
   stopGenerationService,
   type GenerationServiceConfig,
 } from './generationService';
+
+// Clipboard Service
+export {
+  ClipboardManager,
+  getClipboardManager,
+  initClipboardService,
+  cleanupClipboardService,
+} from './clipboardService';

@@ -19,10 +19,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Split vendor code for better caching
-          'core-engine': [
-            './src/core/engine/NodeSystem.ts',
-            './src/core/engine/ViewportManager.ts',
-            './src/core/engine/ConnectionManager.ts',
+          'core-managers': [
+            './src/core/managers/NodeSystem.ts',
+            './src/core/managers/ViewportManager.ts',
+            './src/core/managers/ConnectionManager.ts',
           ],
         },
       },

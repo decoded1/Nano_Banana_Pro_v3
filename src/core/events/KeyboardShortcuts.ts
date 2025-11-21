@@ -5,10 +5,15 @@
  * Handles common shortcuts like Ctrl+Z (undo), Ctrl+S (save), etc.
  */
 
+import { useStore } from '@/state';
 import { getHistoryManager } from '@/state/persistence';
 
 import { eventBus } from './EventBus';
 import { EVENTS } from './EventTypes';
+
+// Node movement step sizes
+const MOVE_STEP = 10;
+const MOVE_STEP_LARGE = 50;
 
 // =============================================================================
 // TYPES
@@ -349,6 +354,78 @@ export class KeyboardShortcuts {
         eventBus.emit(EVENTS.UI.FOCUS_PROMPT, {});
       },
     });
+
+    // Arrow key navigation for selected nodes
+    this.register({
+      key: 'ArrowUp',
+      description: 'Move selected nodes up',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(0, -MOVE_STEP),
+    });
+
+    this.register({
+      key: 'ArrowDown',
+      description: 'Move selected nodes down',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(0, MOVE_STEP),
+    });
+
+    this.register({
+      key: 'ArrowLeft',
+      description: 'Move selected nodes left',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(-MOVE_STEP, 0),
+    });
+
+    this.register({
+      key: 'ArrowRight',
+      description: 'Move selected nodes right',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(MOVE_STEP, 0),
+    });
+
+    // Shift + Arrow for larger movement
+    this.register({
+      key: 'ArrowUp',
+      shift: true,
+      description: 'Move selected nodes up (large step)',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(0, -MOVE_STEP_LARGE),
+    });
+
+    this.register({
+      key: 'ArrowDown',
+      shift: true,
+      description: 'Move selected nodes down (large step)',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(0, MOVE_STEP_LARGE),
+    });
+
+    this.register({
+      key: 'ArrowLeft',
+      shift: true,
+      description: 'Move selected nodes left (large step)',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(-MOVE_STEP_LARGE, 0),
+    });
+
+    this.register({
+      key: 'ArrowRight',
+      shift: true,
+      description: 'Move selected nodes right (large step)',
+      preventDefault: true,
+      action: () => this.moveSelectedNodes(MOVE_STEP_LARGE, 0),
+    });
+  }
+
+  /**
+   * Move selected nodes by delta
+   */
+  private moveSelectedNodes(dx: number, dy: number): void {
+    const state = useStore.getState();
+    if (state.selectedIds.length === 0) return;
+
+    state.moveNodes(state.selectedIds, { x: dx, y: dy });
   }
 
   // ---------------------------------------------------------------------------

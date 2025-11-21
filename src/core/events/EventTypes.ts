@@ -19,6 +19,8 @@ export const NODE_EVENTS = {
   DRAG_MOVE: 'node:drag-move',
   DRAG_END: 'node:drag-end',
   SELECTION_CHANGED: 'nodes:selection-changed',
+  CREATE_REQUESTED: 'node:create-requested',
+  EXPORT_REQUESTED: 'node:export-requested',
 } as const;
 
 // =============================================================================
@@ -63,6 +65,7 @@ export const GENERATION_EVENTS = {
   COMPLETED: 'generation:completed',
   FAILED: 'generation:failed',
   CANCELLED: 'generation:cancelled',
+  REGENERATE_REQUESTED: 'generation:regenerate-requested',
 } as const;
 
 // =============================================================================
@@ -79,6 +82,8 @@ export const UI_EVENTS = {
   REFERENCE_ADDED: 'reference:added',
   REFERENCE_REMOVED: 'reference:removed',
   FOCUS_PROMPT: 'ui:focus-prompt',
+  CONTEXT_MENU_SHOW: 'ui:context-menu-show',
+  CONTEXT_MENU_HIDE: 'ui:context-menu-hide',
 } as const;
 
 // =============================================================================

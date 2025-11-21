@@ -5,8 +5,8 @@
  * Combines all slices into a unified store with devtools support.
  */
 
-import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
+import { createStore } from 'zustand/vanilla';
 
 import { createCanvasSlice, type CanvasSlice } from './slices/canvasSlice';
 import { createGenerationSlice, type GenerationSlice } from './slices/generationSlice';
@@ -34,7 +34,7 @@ export type AppState = NodesSlice & CanvasSlice & SelectionSlice & GenerationSli
  * - generation: Image generation (queue, config, API)
  * - ui: UI state (drawer, modals, toasts)
  */
-export const useStore = create<AppState>()(
+export const useStore = createStore<AppState>()(
   devtools(
     subscribeWithSelector((...args) => ({
       ...createNodesSlice(...args),

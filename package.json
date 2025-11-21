@@ -1,0 +1,21 @@
+{
+  "name": "nano-banana-pro",
+  "version": "0.1.0",
+  "description": "Gemini 3 Pro Image - Infinite Canvas for AI Image Generation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

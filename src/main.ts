@@ -2,12 +2,23 @@
  * Nano Banana Pro - Application Entry Point
  *
  * This is the main entry point for the Vite application.
- * It initializes the app and mounts it to the DOM.
+ * It initializes the app and mounts all components to the DOM.
  */
 
 import './styles/main.css';
 
-// Application initialization
+import { Canvas, TopBar, LeftDrawer, PromptIsland } from './components';
+import { initializeEventBridge, cleanupEventBridge } from './state';
+
+// Component instances
+let canvas: Canvas | null = null;
+let topBar: TopBar | null = null;
+let leftDrawer: LeftDrawer | null = null;
+let promptIsland: PromptIsland | null = null;
+
+/**
+ * Application initialization
+ */
 const initApp = (): void => {
   const appElement = document.getElementById('app');
 
@@ -15,43 +26,55 @@ const initApp = (): void => {
     throw new Error('App mount point (#app) not found in DOM');
   }
 
-  // Phase 0: Basic verification that the build system works
-  // This will be replaced with proper app initialization in Phase 6
-  appElement.innerHTML = `
-    <div style="
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 16px;
-    ">
-      <div style="
-        width: 12px;
-        height: 12px;
-        background: var(--accent-primary);
-        border-radius: 50%;
-        box-shadow: 0 0 20px var(--accent-primary);
-        animation: pulse 2s infinite;
-      "></div>
-      <h1 style="font-size: 24px; font-weight: 600;">Nano Banana Pro</h1>
-      <p style="color: var(--text-muted); font-size: 14px;">
-        Gemini 3 Pro Image - Infinite Canvas
-      </p>
-      <p style="color: var(--text-muted); font-size: 12px; margin-top: 24px;">
-        Phase 0 Complete - Build System Verified
-      </p>
-    </div>
-    <style>
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.2); opacity: 0.7; }
-      }
-    </style>
-  `;
+  // Initialize event bridge (connects EventBus to Zustand store)
+  initializeEventBridge();
 
-  console.log('[Nano Banana Pro] Application initialized');
-  console.log('[Nano Banana Pro] Phase 0: Foundation complete');
+  // Create UI layer for floating elements
+  const uiLayer = document.createElement('div');
+  uiLayer.className = 'ui-layer';
+
+  // Initialize components
+  canvas = new Canvas();
+  topBar = new TopBar();
+  leftDrawer = new LeftDrawer();
+  promptIsland = new PromptIsland();
+
+  // Mount canvas directly to app
+  canvas.mount(appElement);
+
+  // Mount UI components to UI layer
+  topBar.mount(uiLayer);
+  leftDrawer.mount(uiLayer);
+  promptIsland.mount(uiLayer);
+
+  // Add UI layer to app
+  appElement.appendChild(uiLayer);
+
+  // Log initialization
+  if (import.meta.env.DEV) {
+    console.log('[Nano Banana Pro] Application initialized');
+    console.log('[Nano Banana Pro] Phase 6: Components mounted');
+  }
+};
+
+/**
+ * Application cleanup
+ */
+const cleanupApp = (): void => {
+  // Destroy components
+  canvas?.destroy();
+  topBar?.destroy();
+  leftDrawer?.destroy();
+  promptIsland?.destroy();
+
+  // Cleanup event bridge
+  cleanupEventBridge();
+
+  // Reset references
+  canvas = null;
+  topBar = null;
+  leftDrawer = null;
+  promptIsland = null;
 };
 
 // Initialize when DOM is ready
@@ -61,9 +84,17 @@ if (document.readyState === 'loading') {
   initApp();
 }
 
+// Cleanup on page unload
+window.addEventListener('beforeunload', cleanupApp);
+
 // Hot Module Replacement support
 if (import.meta.hot) {
   import.meta.hot.accept(() => {
     console.log('[HMR] Module updated');
+    cleanupApp();
+    initApp();
   });
 }
+
+// Export for external access (useful for debugging)
+export { canvas, topBar, leftDrawer, promptIsland };

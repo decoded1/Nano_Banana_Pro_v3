@@ -5,3 +5,4 @@
 export { NodeCard } from './NodeCard';
 export type { NodeCardProps } from './NodeCard';
 export { GhostNode } from './GhostNode';
+export type { GhostNodeProps } from './GhostNode';

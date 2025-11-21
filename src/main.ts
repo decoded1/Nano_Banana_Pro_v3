@@ -7,7 +7,8 @@
 
 import './styles/main.css';
 
-import { Canvas, TopBar, LeftDrawer, PromptIsland } from './components';
+import { Canvas, TopBar, LeftDrawer, PromptIsland, ToastContainer } from './components';
+import { initGenerationService, stopGenerationService } from './services';
 import { initializeEventBridge, cleanupEventBridge } from './state';
 
 // Component instances
@@ -15,6 +16,7 @@ let canvas: Canvas | null = null;
 let topBar: TopBar | null = null;
 let leftDrawer: LeftDrawer | null = null;
 let promptIsland: PromptIsland | null = null;
+let toastContainer: ToastContainer | null = null;
 
 /**
  * Application initialization
@@ -38,6 +40,7 @@ const initApp = (): void => {
   topBar = new TopBar();
   leftDrawer = new LeftDrawer();
   promptIsland = new PromptIsland();
+  toastContainer = new ToastContainer();
 
   // Mount canvas directly to app
   canvas.mount(appElement);
@@ -46,14 +49,18 @@ const initApp = (): void => {
   topBar.mount(uiLayer);
   leftDrawer.mount(uiLayer);
   promptIsland.mount(uiLayer);
+  toastContainer.mount(uiLayer);
 
   // Add UI layer to app
   appElement.appendChild(uiLayer);
 
+  // Initialize generation service (queue processor)
+  initGenerationService();
+
   // Log initialization
   if (import.meta.env.DEV) {
     console.log('[Nano Banana Pro] Application initialized');
-    console.log('[Nano Banana Pro] Phase 6: Components mounted');
+    console.log('[Nano Banana Pro] Phase 7: Services integrated');
   }
 };
 
@@ -61,11 +68,15 @@ const initApp = (): void => {
  * Application cleanup
  */
 const cleanupApp = (): void => {
+  // Stop generation service
+  stopGenerationService();
+
   // Destroy components
   canvas?.destroy();
   topBar?.destroy();
   leftDrawer?.destroy();
   promptIsland?.destroy();
+  toastContainer?.destroy();
 
   // Cleanup event bridge
   cleanupEventBridge();
@@ -75,6 +86,7 @@ const cleanupApp = (): void => {
   topBar = null;
   leftDrawer = null;
   promptIsland = null;
+  toastContainer = null;
 };
 
 // Initialize when DOM is ready
@@ -97,4 +109,4 @@ if (import.meta.hot) {
 }
 
 // Export for external access (useful for debugging)
-export { canvas, topBar, leftDrawer, promptIsland };
+export { canvas, topBar, leftDrawer, promptIsland, toastContainer };

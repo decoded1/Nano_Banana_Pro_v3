@@ -30,6 +30,10 @@ export const CANVAS_EVENTS = {
   PAN_MOVE: 'canvas:pan-move',
   PAN_END: 'canvas:pan-end',
   ZOOM: 'canvas:zoom',
+  ZOOM_IN: 'canvas:zoom-in',
+  ZOOM_OUT: 'canvas:zoom-out',
+  ZOOM_TO_FIT: 'canvas:zoom-to-fit',
+  RESET_ZOOM: 'canvas:reset-zoom',
   TRANSFORM_CHANGED: 'canvas:transform-changed',
   CLICK: 'canvas:click',
   CONTEXT_MENU: 'canvas:context-menu',
@@ -74,6 +78,28 @@ export const UI_EVENTS = {
   PROMPT_CHANGED: 'prompt:changed',
   REFERENCE_ADDED: 'reference:added',
   REFERENCE_REMOVED: 'reference:removed',
+  FOCUS_PROMPT: 'ui:focus-prompt',
+} as const;
+
+// =============================================================================
+// SELECTION EVENTS
+// =============================================================================
+
+export const SELECTION_EVENTS = {
+  CHANGED: 'selection:changed',
+  SELECT_ALL: 'selection:select-all',
+  CLEAR: 'selection:clear',
+  DELETE_REQUESTED: 'selection:delete-requested',
+} as const;
+
+// =============================================================================
+// CLIPBOARD EVENTS
+// =============================================================================
+
+export const CLIPBOARD_EVENTS = {
+  COPY: 'clipboard:copy',
+  PASTE: 'clipboard:paste',
+  CUT: 'clipboard:cut',
 } as const;
 
 // =============================================================================
@@ -84,6 +110,9 @@ export const PROJECT_EVENTS = {
   LOADED: 'project:loaded',
   SAVED: 'project:saved',
   MODIFIED: 'project:modified',
+  NEW_REQUESTED: 'project:new-requested',
+  OPEN_REQUESTED: 'project:open-requested',
+  SAVE_REQUESTED: 'project:save-requested',
 } as const;
 
 // =============================================================================
@@ -106,6 +135,8 @@ export const EVENTS = {
   CONNECTION: CONNECTION_EVENTS,
   GENERATION: GENERATION_EVENTS,
   UI: UI_EVENTS,
+  SELECTION: SELECTION_EVENTS,
+  CLIPBOARD: CLIPBOARD_EVENTS,
   PROJECT: PROJECT_EVENTS,
   HISTORY: HISTORY_EVENTS,
 } as const;
@@ -134,3 +165,9 @@ export type ProjectEventName = (typeof PROJECT_EVENTS)[keyof typeof PROJECT_EVEN
 
 /** All history event names */
 export type HistoryEventName = (typeof HISTORY_EVENTS)[keyof typeof HISTORY_EVENTS];
+
+/** All selection event names */
+export type SelectionEventName = (typeof SELECTION_EVENTS)[keyof typeof SELECTION_EVENTS];
+
+/** All clipboard event names */
+export type ClipboardEventName = (typeof CLIPBOARD_EVENTS)[keyof typeof CLIPBOARD_EVENTS];

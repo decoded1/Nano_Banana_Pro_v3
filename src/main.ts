@@ -8,8 +8,14 @@
 import './styles/main.css';
 
 import { Canvas, TopBar, LeftDrawer, PromptIsland, ToastContainer } from './components';
+import { initKeyboardShortcuts, cleanupKeyboardShortcuts } from './core/events';
 import { initGenerationService, stopGenerationService } from './services';
-import { initializeEventBridge, cleanupEventBridge } from './state';
+import {
+  initializeEventBridge,
+  cleanupEventBridge,
+  initProjectManager,
+  cleanupProjectManager,
+} from './state';
 
 // Component instances
 let canvas: Canvas | null = null;
@@ -21,7 +27,7 @@ let toastContainer: ToastContainer | null = null;
 /**
  * Application initialization
  */
-const initApp = (): void => {
+const initApp = async (): Promise<void> => {
   const appElement = document.getElementById('app');
 
   if (!appElement) {
@@ -30,6 +36,17 @@ const initApp = (): void => {
 
   // Initialize event bridge (connects EventBus to Zustand store)
   initializeEventBridge();
+
+  // Initialize keyboard shortcuts
+  initKeyboardShortcuts();
+
+  // Initialize persistence (async)
+  try {
+    await initProjectManager();
+  } catch (error) {
+    console.error('[Nano Banana Pro] Failed to initialize persistence:', error);
+    // Continue without persistence - app can still work
+  }
 
   // Create UI layer for floating elements
   const uiLayer = document.createElement('div');
@@ -60,7 +77,7 @@ const initApp = (): void => {
   // Log initialization
   if (import.meta.env.DEV) {
     console.log('[Nano Banana Pro] Application initialized');
-    console.log('[Nano Banana Pro] Phase 7: Services integrated');
+    console.log('[Nano Banana Pro] Phase 8: Persistence integrated');
   }
 };
 
@@ -70,6 +87,12 @@ const initApp = (): void => {
 const cleanupApp = (): void => {
   // Stop generation service
   stopGenerationService();
+
+  // Cleanup persistence
+  cleanupProjectManager();
+
+  // Cleanup keyboard shortcuts
+  cleanupKeyboardShortcuts();
 
   // Destroy components
   canvas?.destroy();
@@ -104,7 +127,7 @@ if (import.meta.hot) {
   import.meta.hot.accept(() => {
     console.log('[HMR] Module updated');
     cleanupApp();
-    initApp();
+    void initApp();
   });
 }
 

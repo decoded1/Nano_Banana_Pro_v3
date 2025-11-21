@@ -209,8 +209,9 @@ export interface ToastState {
  * Project info for top bar
  */
 export interface ProjectInfo {
+  id?: string | undefined;
   name: string;
-  isModified: boolean;
+  isModified?: boolean | undefined;
   lastSaved?: Date | undefined;
 }
 

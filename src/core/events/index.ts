@@ -14,6 +14,8 @@ export {
   CONNECTION_EVENTS,
   GENERATION_EVENTS,
   UI_EVENTS,
+  SELECTION_EVENTS,
+  CLIPBOARD_EVENTS,
   PROJECT_EVENTS,
   HISTORY_EVENTS,
 } from './EventTypes';
@@ -23,6 +25,8 @@ export type {
   ConnectionEventName,
   GenerationEventName,
   UIEventName,
+  SelectionEventName,
+  ClipboardEventName,
   ProjectEventName,
   HistoryEventName,
 } from './EventTypes';
@@ -33,3 +37,11 @@ export {
   enableEventLogging,
   getEventStats,
 } from './EventHandlers';
+
+export {
+  KeyboardShortcuts,
+  getKeyboardShortcuts,
+  initKeyboardShortcuts,
+  cleanupKeyboardShortcuts,
+} from './KeyboardShortcuts';
+export type { ShortcutDefinition, KeyboardShortcutsConfig } from './KeyboardShortcuts';

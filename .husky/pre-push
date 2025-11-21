@@ -1,0 +1,57 @@
+echo "========================================"
+echo "  PRE-PUSH AUDIT - Code Quality Check  "
+echo "========================================"
+echo ""
+
+# Run TypeScript type checking
+echo "[1/4] Running TypeScript type check..."
+npm run typecheck
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "PUSH BLOCKED: TypeScript errors found"
+    echo "Fix type errors before pushing."
+    exit 1
+fi
+echo "TypeScript check passed"
+echo ""
+
+# Run ESLint
+echo "[2/4] Running ESLint..."
+npm run lint
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "PUSH BLOCKED: Linting errors found"
+    echo "Run 'npm run lint:fix' to auto-fix issues."
+    exit 1
+fi
+echo "Linting check passed"
+echo ""
+
+# Run Stylelint
+echo "[3/4] Running Stylelint..."
+npm run stylelint
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "PUSH BLOCKED: CSS linting errors found"
+    echo "Run 'npm run stylelint:fix' to auto-fix issues."
+    exit 1
+fi
+echo "Stylelint check passed"
+echo ""
+
+# Run Prettier check
+echo "[4/4] Running Prettier format check..."
+npm run format:check
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "PUSH BLOCKED: Formatting issues found"
+    echo "Run 'npm run format' to fix formatting."
+    exit 1
+fi
+echo "Format check passed"
+echo ""
+
+echo "========================================"
+echo "  ALL CHECKS PASSED - Push allowed     "
+echo "========================================"
+exit 0

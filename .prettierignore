@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Package manager files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Backup files
+*.original

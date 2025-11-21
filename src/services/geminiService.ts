@@ -11,6 +11,10 @@ import type {
   GenerationConfig,
   ConversationTurn,
   GenerationResult,
+  GeminiRequestPart,
+  GeminiRequestContent,
+  GeminiImageGenerationConfig,
+  GeminiRequestBody,
 } from '../types';
 
 // =============================================================================
@@ -110,7 +114,9 @@ const getApiKey = (): string => {
     '';
 
   if (!key) {
-    throw new Error('Gemini API key not found. Please set VITE_GEMINI_API_KEY in your .env.local file.');
+    throw new Error(
+      'Gemini API key not found. Please set VITE_GEMINI_API_KEY in your .env.local file.',
+    );
   }
 
   return key;
@@ -123,7 +129,7 @@ const buildSystemPrompt = (rules?: PinnedRule[]): string => {
   const activeRules = rules?.filter((r) => r.active) || [];
 
   if (activeRules.length === 0) {
-    return 'You are an expert image generator. Create high-quality images based on the user\'s instructions.';
+    return "You are an expert image generator. Create high-quality images based on the user's instructions.";
   }
 
   const rulesText = activeRules.map((r, i) => `${i + 1}. ${r.text}`).join('\n');
@@ -143,7 +149,7 @@ const buildPromptText = (
   prompt: string,
   hasTarget: boolean,
   refCount: number,
-  negativePrompt?: string
+  negativePrompt?: string,
 ): string => {
   let fullPrompt = prompt;
 
@@ -172,12 +178,12 @@ const buildContents = (
   targetImage?: ImageData | null,
   referenceImages?: ImageData[],
   conversationHistory?: ConversationTurn[],
-  isEditMode?: boolean
-): any[] => {
+  isEditMode?: boolean,
+): GeminiRequestContent[] => {
   // If edit mode with conversation history, use the history
   if (isEditMode && conversationHistory && conversationHistory.length > 0) {
     // Add new user turn
-    const userParts: any[] = [];
+    const userParts: GeminiRequestPart[] = [];
 
     // Add target image if present
     if (targetImage) {
@@ -205,7 +211,7 @@ const buildContents = (
   }
 
   // Build new conversation
-  const parts: any[] = [];
+  const parts: GeminiRequestPart[] = [];
 
   // Add target image first
   if (targetImage) {
@@ -302,15 +308,8 @@ const extractModelResponse = (response: GeminiResponse): ConversationTurn | unde
  * Generate images using Gemini API
  */
 export async function generateImages(options: GenerationOptions): Promise<GenerationResult> {
-  const {
-    prompt,
-    targetImage,
-    referenceImages,
-    rules,
-    config,
-    conversationHistory,
-    isEditMode,
-  } = options;
+  const { prompt, targetImage, referenceImages, rules, config, conversationHistory, isEditMode } =
+    options;
 
   const apiKey = getApiKey();
   const url = `${API_BASE_URL}/${MODEL_ID}:generateContent?key=${apiKey}`;
@@ -321,17 +320,17 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     prompt,
     !!targetImage,
     activeRefs.length,
-    config.negativePrompt
+    config.negativePrompt,
   );
 
   // Build request body
-  const requestBody: any = {
+  const requestBody: GeminiRequestBody = {
     contents: buildContents(
       fullPrompt,
       targetImage,
       referenceImages,
       conversationHistory,
-      isEditMode
+      isEditMode,
     ),
     generationConfig: {
       // Must include TEXT with IMAGE for Gemini image generation
@@ -365,7 +364,7 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
   };
 
   // Build imageGenerationConfig for Gemini 3 Pro Image API
-  const imageGenerationConfig: any = {};
+  const imageGenerationConfig: GeminiImageGenerationConfig = {};
 
   // Aspect ratio - supported: "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
   if (config.aspectRatio && ASPECT_RATIO_MAP[config.aspectRatio]) {
@@ -386,12 +385,12 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
   if (config.personGeneration) {
     // Convert to API format (uppercase with underscore)
     const personGenMap: Record<string, string> = {
-      'dont_allow': 'DONT_ALLOW',
-      'allow_adult': 'ALLOW_ADULT',
-      'allow_all': 'ALLOW_ALL',
-      'DONT_ALLOW': 'DONT_ALLOW',
-      'ALLOW_ADULT': 'ALLOW_ADULT',
-      'ALLOW_ALL': 'ALLOW_ALL',
+      dont_allow: 'DONT_ALLOW',
+      allow_adult: 'ALLOW_ADULT',
+      allow_all: 'ALLOW_ALL',
+      DONT_ALLOW: 'DONT_ALLOW',
+      ALLOW_ADULT: 'ALLOW_ADULT',
+      ALLOW_ALL: 'ALLOW_ALL',
     };
     imageGenerationConfig.personGeneration = personGenMap[config.personGeneration] || 'ALLOW_ADULT';
   }
@@ -441,7 +440,8 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const errorMessage = errorData.error?.message || `API request failed with status ${response.status}`;
+    const errorMessage =
+      errorData.error?.message || `API request failed with status ${response.status}`;
     console.error('[Gemini] API Error:', errorMessage);
     throw new Error(errorMessage);
   }

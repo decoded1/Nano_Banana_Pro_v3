@@ -81,3 +81,55 @@ export interface GenerationResult {
   /** Model response for conversation history */
   modelResponse?: ConversationTurn | undefined;
 }
+
+// =============================================================================
+// GEMINI API REQUEST/RESPONSE TYPES
+// =============================================================================
+
+/**
+ * Content part for API request
+ */
+export type GeminiRequestPart = ConversationPart;
+
+/**
+ * Content turn for API request
+ */
+export interface GeminiRequestContent {
+  role: 'user' | 'model';
+  parts: GeminiRequestPart[];
+}
+
+/**
+ * Image generation config for API request
+ */
+export interface GeminiImageGenerationConfig {
+  aspectRatio?: string | undefined;
+  imageSize?: string | undefined;
+  numberOfImages?: number | undefined;
+  personGeneration?: string | undefined;
+  addWatermark?: boolean | undefined;
+}
+
+/**
+ * Generation config for API request
+ */
+export interface GeminiGenerationConfig {
+  responseModalities: string[];
+  imageGenerationConfig?: GeminiImageGenerationConfig;
+}
+
+/**
+ * Full API request body
+ */
+export interface GeminiRequestBody {
+  contents: GeminiRequestContent[];
+  generationConfig: GeminiGenerationConfig;
+  safetySettings: {
+    category: string;
+    threshold: string;
+  }[];
+  systemInstruction?: {
+    parts: { text: string }[];
+  };
+  tools?: { googleSearch: Record<string, never> }[];
+}

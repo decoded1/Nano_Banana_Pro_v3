@@ -92,27 +92,8 @@ export const ASPECT_RATIOS: AspectRatio[] = [
   '21:9',
 ];
 
-/**
- * Person generation setting
- * - ALLOW_ADULT: Only adult faces (default)
- * - ALLOW_ALL: All people including children
- * - DONT_ALLOW: Hard block on generating people
- */
-export type PersonGeneration = 'ALLOW_ADULT' | 'ALLOW_ALL' | 'DONT_ALLOW';
-
-/**
- * All person generation options
- */
-export const PERSON_GENERATION_OPTIONS: PersonGeneration[] = [
-  'ALLOW_ADULT',
-  'ALLOW_ALL',
-  'DONT_ALLOW',
-];
-
-/**
- * Number of images to generate (1-4)
- */
-export type NumberOfImages = 1 | 2 | 3 | 4;
+// NOTE: personGeneration is NOT supported by Gemini 3 Pro Image API (Imagen only)
+// NOTE: numberOfImages is NOT supported - API always returns 1 image per request
 
 /**
  * Supported input MIME types
@@ -158,34 +139,40 @@ export interface PinnedRule {
 
 /**
  * Generation configuration options with proper type safety
+ *
+ * VALID PARAMETERS (tested & confirmed):
+ * - responseModalities: ["IMAGE"] or ["TEXT", "IMAGE"]
+ * - candidateCount: 1 only (multiple candidates not supported)
+ * - aspectRatio: inside generationConfig.imageConfig
+ * - imageSize: inside generationConfig.imageConfig
+ *
+ * INVALID PARAMETERS (DO NOT USE - will cause 400 errors):
+ * - numberOfImages / number_of_images
+ * - personGeneration / person_generation (Imagen only)
+ * - addWatermark / add_watermark
+ * - negativePrompt / negative_prompt (use "AVOID:" in prompt text instead)
+ * - outputMimeType
+ * - safetyFilterLevel
+ * - imageGenerationConfig (top-level)
  */
 export interface GenerationConfig {
   /** Output aspect ratio */
   aspectRatio?: AspectRatio;
   /** Output image size (1K, 2K, 4K - MUST be uppercase) */
   imageSize?: ImageSize;
-  /** Number of images to generate (1-4) */
-  numberOfImages?: NumberOfImages;
-  /** Person generation setting */
-  personGeneration?: PersonGeneration;
-  /** Negative prompt (what to avoid) */
+  /** Negative prompt (what to avoid) - will be appended to prompt as "AVOID: ..." */
   negativePrompt?: string;
-  /** Whether to add SynthID watermark (default: true) */
-  addWatermark?: boolean;
-  /** Whether to use Google Search grounding */
+  /** Whether to use Google Search grounding (requires ["TEXT", "IMAGE"] modalities) */
   useGoogleSearch?: boolean;
 }
 
 /**
  * Default generation configuration
  */
-export const DEFAULT_GENERATION_CONFIG: Required<GenerationConfig> = {
+export const DEFAULT_GENERATION_CONFIG: GenerationConfig = {
   aspectRatio: '1:1',
   imageSize: '2K',
-  numberOfImages: 4,
-  personGeneration: 'ALLOW_ADULT',
   negativePrompt: '',
-  addWatermark: false,
   useGoogleSearch: false,
 };
 
@@ -228,6 +215,8 @@ export interface EditingSession {
 
 /**
  * Part of a conversation turn
+ * For multi-turn editing, model responses include thoughtSignature
+ * which MUST be preserved and re-sent in follow-up requests
  */
 export interface ConversationPart {
   text?: string;
@@ -235,6 +224,8 @@ export interface ConversationPart {
     mimeType: string;
     data: string;
   };
+  /** Required for multi-turn editing - preserve from model response */
+  thoughtSignature?: string;
 }
 
 /**
@@ -370,8 +361,17 @@ export interface ApiError {
 
 /**
  * Content part for API request
+ * Includes thoughtSignature for multi-turn editing
  */
-export type GeminiRequestPart = ConversationPart;
+export interface GeminiRequestPart {
+  text?: string;
+  inlineData?: {
+    mimeType: string;
+    data: string;
+  };
+  /** Required for multi-turn editing - preserve from model response */
+  thoughtSignature?: string;
+}
 
 /**
  * Content turn for API request
@@ -382,31 +382,43 @@ export interface GeminiRequestContent {
 }
 
 /**
- * Image generation config for API request
+ * Image config for API request (inside generationConfig)
+ * Only aspectRatio and imageSize are valid parameters
  */
-export interface GeminiImageGenerationConfig {
-  aspectRatio?: AspectRatio | undefined;
-  imageSize?: ImageSize | undefined;
-  numberOfImages?: NumberOfImages | undefined;
-  personGeneration?: PersonGeneration | undefined;
-  addWatermark?: boolean | undefined;
-  negativePrompt?: string | undefined;
+export interface GeminiImageConfig {
+  aspectRatio?: AspectRatio;
+  imageSize?: ImageSize;
 }
 
 /**
  * Generation config for API request
+ * imageConfig must be INSIDE generationConfig, NOT at top level
  */
 export interface GeminiGenerationConfig {
-  responseModalities: string[];
+  responseModalities: ('TEXT' | 'IMAGE')[];
+  candidateCount?: 1; // Only 1 is supported
+  imageConfig?: GeminiImageConfig;
 }
 
 /**
  * Full API request body
+ *
+ * CORRECT STRUCTURE:
+ * {
+ *   "contents": [...],
+ *   "generationConfig": {
+ *     "responseModalities": ["IMAGE"],
+ *     "imageConfig": {
+ *       "aspectRatio": "16:9",
+ *       "imageSize": "2K"
+ *     }
+ *   }
+ * }
  */
 export interface GeminiRequestBody {
   contents: GeminiRequestContent[];
   generationConfig: GeminiGenerationConfig;
-  safetySettings: {
+  safetySettings?: {
     category: string;
     threshold: string;
   }[];
@@ -414,7 +426,6 @@ export interface GeminiRequestBody {
     parts: { text: string }[];
   };
   tools?: { googleSearch: Record<string, never> }[];
-  imageGenerationConfig?: GeminiImageGenerationConfig;
 }
 
 // =============================================================================

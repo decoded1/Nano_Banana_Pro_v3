@@ -13,10 +13,8 @@ import type {
   GenerationResult,
   GeminiRequestPart,
   GeminiRequestContent,
-  GeminiImageGenerationConfig,
   GeminiRequestBody,
-  AspectRatio,
-  PersonGeneration,
+  GeminiImageConfig,
 } from '../types';
 
 // =============================================================================
@@ -41,25 +39,27 @@ export interface GenerationOptions {
 }
 
 // API Response types
-interface GeminiImagePart {
+interface GeminiResponsePart {
+  text?: string;
   inlineData?: {
     mimeType: string;
     data: string;
   };
+  /** Critical for multi-turn editing - MUST be preserved */
+  thoughtSignature?: string;
 }
-
-interface GeminiTextPart {
-  text?: string;
-}
-
-type GeminiPart = GeminiImagePart | GeminiTextPart;
 
 interface GeminiCandidate {
   content: {
-    parts: GeminiPart[];
+    parts: GeminiResponsePart[];
     role: string;
   };
   finishReason: string;
+  /** Safety ratings if content was blocked */
+  safetyRatings?: {
+    category: string;
+    probability: string;
+  }[];
 }
 
 interface GeminiResponse {
@@ -274,6 +274,7 @@ const extractImages = (response: GeminiResponse): string[] => {
 
 /**
  * Extract model response turn for conversation history
+ * IMPORTANT: Preserves thoughtSignature for multi-turn editing
  */
 const extractModelResponse = (response: GeminiResponse): ConversationTurn | undefined => {
   if (!response.candidates?.[0]?.content) {
@@ -285,21 +286,44 @@ const extractModelResponse = (response: GeminiResponse): ConversationTurn | unde
   return {
     role: 'model',
     parts: content.parts.map((part) => {
+      const result: GeminiRequestPart = {};
+
       if ('text' in part && part.text) {
-        return { text: part.text };
+        result.text = part.text;
       }
       if ('inlineData' in part && part.inlineData) {
-        return {
-          inlineData: {
-            mimeType: part.inlineData.mimeType,
-            data: part.inlineData.data,
-          },
+        result.inlineData = {
+          mimeType: part.inlineData.mimeType,
+          data: part.inlineData.data,
         };
       }
-      return {};
+      // CRITICAL: Preserve thoughtSignature for multi-turn editing
+      if ('thoughtSignature' in part && part.thoughtSignature) {
+        result.thoughtSignature = part.thoughtSignature;
+      }
+
+      return result;
     }),
     timestamp: Date.now(),
   };
+};
+
+/**
+ * Extract thoughtSignature from response for multi-turn editing
+ * The thoughtSignature MUST be included in follow-up requests
+ */
+const extractThoughtSignature = (response: GeminiResponse): string | undefined => {
+  if (!response.candidates?.[0]?.content?.parts) {
+    return undefined;
+  }
+
+  for (const part of response.candidates[0].content.parts) {
+    if ('thoughtSignature' in part && part.thoughtSignature) {
+      return part.thoughtSignature;
+    }
+  }
+
+  return undefined;
 };
 
 // =============================================================================
@@ -308,6 +332,13 @@ const extractModelResponse = (response: GeminiResponse): ConversationTurn | unde
 
 /**
  * Generate images using Gemini API
+ *
+ * CORRECT API STRUCTURE (as of November 2025):
+ * - imageConfig goes INSIDE generationConfig
+ * - Only valid params: aspectRatio, imageSize
+ * - INVALID params: numberOfImages, personGeneration, addWatermark (will cause 400 errors)
+ * - For search grounding, use ["TEXT", "IMAGE"] modalities
+ * - For basic generation, ["IMAGE"] is sufficient
  */
 export async function generateImages(options: GenerationOptions): Promise<GenerationResult> {
   const { prompt, targetImage, referenceImages, rules, config, conversationHistory, isEditMode } =
@@ -316,7 +347,7 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
   const apiKey = getApiKey();
   const url = `${API_BASE_URL}/${MODEL_ID}:generateContent?key=${apiKey}`;
 
-  // Build the full prompt
+  // Build the full prompt (including negative prompt as "AVOID: ...")
   const activeRefs = referenceImages?.filter((r) => r.active) || [];
   const fullPrompt = buildPromptText(
     prompt,
@@ -325,7 +356,20 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     config.negativePrompt,
   );
 
-  // Build request body
+  // Build imageConfig (goes INSIDE generationConfig, NOT at top level)
+  const imageConfig: GeminiImageConfig = {};
+
+  // Aspect ratio - supported: "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
+  if (config.aspectRatio && ASPECT_RATIO_MAP[config.aspectRatio]) {
+    imageConfig.aspectRatio = config.aspectRatio;
+  }
+
+  // Image size - supported: "1K", "2K", "4K"
+  if (config.imageSize && SIZE_MAP[config.imageSize]) {
+    imageConfig.imageSize = config.imageSize;
+  }
+
+  // Build request body with CORRECT structure
   const requestBody: GeminiRequestBody = {
     contents: buildContents(
       fullPrompt,
@@ -335,27 +379,17 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
       isEditMode,
     ),
     generationConfig: {
-      // Must include TEXT with IMAGE for Gemini image generation
-      responseModalities: ['TEXT', 'IMAGE'],
+      // Use TEXT+IMAGE for search grounding or richer responses, IMAGE alone for basic generation
+      responseModalities: config.useGoogleSearch ? ['TEXT', 'IMAGE'] : ['IMAGE'],
+      // Add imageConfig INSIDE generationConfig (this is the correct location!)
+      ...(Object.keys(imageConfig).length > 0 && { imageConfig }),
     },
     // Safety settings
     safetySettings: [
-      {
-        category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_ONLY_HIGH',
-      },
-      {
-        category: 'HARM_CATEGORY_HATE_SPEECH',
-        threshold: 'BLOCK_ONLY_HIGH',
-      },
-      {
-        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        threshold: 'BLOCK_ONLY_HIGH',
-      },
-      {
-        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_ONLY_HIGH',
-      },
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
     ],
   };
 
@@ -365,55 +399,9 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     parts: [{ text: systemPrompt }],
   };
 
-  // Build imageGenerationConfig for Gemini 3 Pro Image API
-  const imageGenerationConfig: GeminiImageGenerationConfig = {};
-
-  // Aspect ratio - supported: "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
-  if (config.aspectRatio && ASPECT_RATIO_MAP[config.aspectRatio]) {
-    imageGenerationConfig.aspectRatio = ASPECT_RATIO_MAP[config.aspectRatio] as AspectRatio;
-  }
-
-  // Image size - supported: "1K", "2K", "4K"
-  if (config.imageSize && SIZE_MAP[config.imageSize]) {
-    imageGenerationConfig.imageSize = config.imageSize;
-  }
-
-  // Number of images to generate (1-4)
-  if (config.numberOfImages && config.numberOfImages >= 1 && config.numberOfImages <= 4) {
-    imageGenerationConfig.numberOfImages = config.numberOfImages;
-  }
-
-  // Person generation - values: "DONT_ALLOW", "ALLOW_ADULT", "ALLOW_ALL"
-  if (config.personGeneration) {
-    // Convert to API format (uppercase with underscore)
-    const personGenMap: Record<string, PersonGeneration> = {
-      dont_allow: 'DONT_ALLOW',
-      allow_adult: 'ALLOW_ADULT',
-      allow_all: 'ALLOW_ALL',
-      DONT_ALLOW: 'DONT_ALLOW',
-      ALLOW_ADULT: 'ALLOW_ADULT',
-      ALLOW_ALL: 'ALLOW_ALL',
-    };
-    imageGenerationConfig.personGeneration = personGenMap[config.personGeneration] ?? 'ALLOW_ADULT';
-  }
-
-  // SynthID Watermark - boolean
-  if (typeof config.addWatermark === 'boolean') {
-    imageGenerationConfig.addWatermark = config.addWatermark;
-  }
-
-  // Add imageGenerationConfig at top level if we have any settings
-  if (Object.keys(imageGenerationConfig).length > 0) {
-    requestBody.imageGenerationConfig = imageGenerationConfig;
-  }
-
   // Add Google Search grounding if enabled
   if (config.useGoogleSearch) {
-    requestBody.tools = [
-      {
-        googleSearch: {},
-      },
-    ];
+    requestBody.tools = [{ googleSearch: {} }];
   }
 
   console.log('[Gemini 3 Pro Image] Sending request:', {
@@ -424,19 +412,14 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     config: {
       aspectRatio: config.aspectRatio,
       imageSize: config.imageSize,
-      numberOfImages: config.numberOfImages,
-      personGeneration: config.personGeneration,
       useGoogleSearch: config.useGoogleSearch,
-      addWatermark: config.addWatermark,
     },
   });
 
   // Make API request
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
   });
 
@@ -456,6 +439,12 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
     throw new Error(data.error.message);
   }
 
+  // Check for safety block
+  if (data.candidates?.[0]?.finishReason === 'SAFETY') {
+    console.error('[Gemini] Content blocked by safety filters:', data.candidates[0].safetyRatings);
+    throw new Error('Content blocked by safety filters. Please modify your prompt.');
+  }
+
   // Extract images
   const images = extractImages(data);
 
@@ -466,12 +455,16 @@ export async function generateImages(options: GenerationOptions): Promise<Genera
 
   console.log('[Gemini] Generated', images.length, 'image(s)');
 
-  // Extract model response for conversation history
+  // Extract model response for conversation history (includes thoughtSignature for multi-turn)
   const modelResponse = extractModelResponse(data);
+
+  // Extract thoughtSignature for multi-turn editing
+  const thoughtSignature = extractThoughtSignature(data);
 
   return {
     images,
     modelResponse,
+    thoughtSignature,
   };
 }
 

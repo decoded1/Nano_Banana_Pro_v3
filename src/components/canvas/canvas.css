@@ -1,0 +1,67 @@
+/* Canvas Container */
+.canvas-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  cursor: grab;
+  touch-action: none; /* Prevent browser zooming */
+}
+
+.canvas-container:active {
+  cursor: grabbing;
+}
+
+/* The Layer that moves (pan/zoom) */
+.canvas-transform-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Grid Background */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Connections Layer (SVG) */
+.connections-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* Actually infinite, but we'll handle this via transform or large size */
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.connection-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 2px;
+  transition: stroke 0.2s ease;
+}
+
+.connection-path.highlighted {
+  stroke: var(--accent-cool);
+  stroke-width: 3px;
+}
+
+/* Nodes Layer */
+.nodes-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none; /* Nodes themselves enable pointer events */
+}

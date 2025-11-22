@@ -353,7 +353,8 @@ class GenerationService {
     }
 
     // Add node to store (image is data URL string)
-    state.addNode({
+    // CRITICAL: Save thoughtSignature if available for multi-turn capability
+    const nodeConfig: any = {
       id: generateId('node'),
       position,
       type: request.targetNodeId ? 'edit' : 'generation',
@@ -363,7 +364,10 @@ class GenerationService {
       image: firstImage,
       badge: request.config.imageSize ?? '1K',
       isGhost: false,
-    });
+      thoughtSignature: result.thoughtSignature // Store the signature
+    };
+
+    state.addNode(nodeConfig);
 
     // If we have multiple images, create additional nodes
     for (let i = 1; i < result.images.length; i++) {

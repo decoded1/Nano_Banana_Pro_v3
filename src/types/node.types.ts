@@ -73,6 +73,8 @@ export interface NodeConfig {
   parentId?: string | undefined;
   /** Generation seed (if applicable) */
   seed?: number | undefined;
+  /** Thought Signature (for multi-turn editing) */
+  thoughtSignature?: string | undefined;
   /** Timestamp of creation */
   createdAt?: number | undefined;
 }

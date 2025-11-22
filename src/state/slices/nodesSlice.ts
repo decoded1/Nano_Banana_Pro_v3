@@ -111,6 +111,7 @@ export const createNodesSlice: StateCreator<NodesSlice, [], [], NodesSlice> = (s
       type: config.type ?? 'generation',
       parentId: config.parentId,
       seed: config.seed,
+      thoughtSignature: config.thoughtSignature,
       createdAt: config.createdAt ?? now,
     };
 

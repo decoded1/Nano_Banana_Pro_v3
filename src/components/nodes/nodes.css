@@ -1,0 +1,121 @@
+/* Node Card Styles */
+.node-card {
+  position: absolute;
+  width: 240px;
+  /* height: auto; - determined by content */
+  background: rgba(10, 12, 18, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+  touch-action: none;
+}
+
+.node-card.selected {
+  border-color: var(--accent-cool);
+  box-shadow: 0 0 0 1px var(--accent-cool), 0 8px 30px rgba(88, 224, 255, 0.15);
+  z-index: 100 !important;
+}
+
+.node-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ports */
+.node-port {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--text-muted);
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.node-port.input { top: -7px; border-color: var(--accent-cool); }
+.node-port.output { bottom: -7px; border-color: var(--accent-warm); }
+
+/* Image Container */
+.node-image-container {
+  width: 100%;
+  min-height: 240px; /* Default 1:1 */
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Loading State */
+.node-card.ghost .node-image-container {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+}
+
+.node-loader {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(88, 224, 255, 0.1);
+  border-top-color: var(--accent-cool);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Metadata Badge */
+.node-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 6px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(4px);
+}
+
+/* Footer */
+.node-footer {
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.node-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.node-prompt {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}

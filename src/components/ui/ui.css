@@ -1,0 +1,161 @@
+/* Prompt Island Wrapper */
+.prompt-island-wrapper {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+  padding: 0 20px;
+  pointer-events: auto; /* Re-enable events since parent is none */
+}
+
+.prompt-island {
+  position: relative;
+  width: min(580px, 100%);
+  height: 52px;
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: all 0.4s var(--easing-soft);
+}
+
+.prompt-island::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg,
+    transparent 20%,
+    rgba(88, 224, 255, 0.3) 45%,
+    rgba(255, 79, 168, 0.3) 55%,
+    transparent 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.prompt-island:focus-within {
+  transform: translateY(-2px);
+  box-shadow:
+    0 24px 50px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 30px rgba(88, 224, 255, 0.15),
+    0 0 30px rgba(255, 79, 168, 0.1);
+}
+
+.prompt-island:focus-within::before {
+  opacity: 1;
+}
+
+/* Icon */
+.island-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent-cool);
+}
+
+.island-sparkle {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  filter: drop-shadow(0 0 8px rgba(88, 224, 255, 0.5));
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* Input */
+.island-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  height: 100%;
+  padding: 0 4px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+  caret-color: var(--accent-cool);
+}
+
+.island-input:focus { outline: none; }
+.island-input::placeholder { color: var(--text-muted); transition: color 0.3s ease; }
+.prompt-island:focus-within .island-input::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Button */
+.island-action {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s var(--easing-soft);
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: #fff;
+}
+
+.island-action:hover {
+  background: linear-gradient(135deg, rgba(88, 224, 255, 0.15), rgba(255, 79, 168, 0.15));
+  border-color: rgba(255,255,255,0.2);
+}
+
+.island-action span {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.8);
+}
+
+.island-action:hover span {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Context Indicator (above prompt) */
+.prompt-context {
+  position: absolute;
+  top: -24px;
+  left: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+}
+
+.prompt-context.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
